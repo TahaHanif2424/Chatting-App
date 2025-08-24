@@ -16,6 +16,7 @@ model User {
   isVerified   Boolean @default(false)
   otp          Int?
   refreshtoken String?
+  avatar       String?
 
   sentMessages     Message[]     @relation("SentMessages")
   receivedMessages Message[]     @relation("ReceivedMessages")
@@ -57,4 +58,9 @@ model Message {
   from  User   @relation("SentMessages", fields: [fromId], references: [id])
   to    User?  @relation("ReceivedMessages", fields: [toId], references: [id])
   group Group? @relation(fields: [groupId], references: [id])
+}
+
+model Avatar{
+  name String
+  avatarURL String @unique
 }

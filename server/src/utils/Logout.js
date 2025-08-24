@@ -9,16 +9,12 @@ const User=require("../Model/User");
             res.clearCookie('jwt',{httpOnly:true, sameSite:'none', secure:true});
             return res.sendStatus(204);
         }
-        
         findUser.refreshToken='';
         await findUser.save();
         res.clearCookie('jwt',{httpOnly:true, sameSite:'none', secure:true});
         return res.sendStatus(204);
-
-
     }catch(err){
-        return res.sendStatus(500);
-        
+        return res.sendStatus(500);     
     }
 }
 

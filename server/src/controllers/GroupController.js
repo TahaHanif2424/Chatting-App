@@ -3,8 +3,17 @@ import db from '../database/prismaConfig.js';
 
 export const createGroup = async (req, res) => {
     try {
-        const { name, adminId } = req.body;
-        if (!adminId || !name) {
+      const loggedIn =req.user;
+      const adminId=db.user.findUnique({
+        where:{
+          email:loggedIn
+        },
+        select:{
+          id: true,
+        }
+      })
+        const { name } = req.body;
+        if (!adminId.id || !name) {
             return res.status(400).send({ message: "Admin or Name are require" });
         }
         const user = await db.user.findUnique({ where: { id: adminId } });
@@ -16,7 +25,7 @@ export const createGroup = async (req, res) => {
                 data: {
                     name,
                     members: {
-                        create: { userId: adminId }
+                        create: { userId: adminId.id }
                     }
                 }
             })
