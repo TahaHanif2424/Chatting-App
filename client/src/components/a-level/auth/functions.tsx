@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR_URL } from "../../../constants/constants";
 import axiosInstance from "../../../lib/axiosInstance"
 import type { logindata, signupdata } from "./types";
 
@@ -16,7 +17,7 @@ export const signup = async (signupdata: signupdata) => {
             name: signupdata.name,
             password: signupdata.password,
             confirmPassword: signupdata.confirmPassword,
-            avatar: signupdata.avatar || "",
+            avatar: signupdata.avatar || DEFAULT_AVATAR_URL,
         });
         if(response.data){
             return true;

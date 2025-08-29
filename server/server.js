@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import UserRoutes from './src/routes/UserRoutes.js';
 import AuthRoutes from './src/routes/AuthRoutes.js';
 import MessageRoutes from './src/routes/MessageRoutes.js';
+import GroupRoutes from './src/routes/GroupRoutes.js';
 import { verifyJWT } from './src/middleware/VerifyJWT.js';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/auth', AuthRoutes);
 app.use(verifyJWT);
 app.use('/api/user', UserRoutes);
 app.use('/api/message', MessageRoutes);
+app.use('/api/group', GroupRoutes);
 
 const connectedUsers = new Map();
 

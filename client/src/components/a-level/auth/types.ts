@@ -3,7 +3,7 @@
     name:string,
     password:string,
     confirmPassword:string,
-    avatar:string
+    avatar?:string
  }
  export type logindata={
     email:string,

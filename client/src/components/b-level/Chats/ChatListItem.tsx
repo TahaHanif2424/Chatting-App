@@ -1,3 +1,4 @@
+import { DEFAULT_AVATAR_URL } from "../../../constants/constants";
 import type { chatItem } from "../types-b";
 
 export default function ChatListItem({ avatar, name, onclick}: chatItem) {
@@ -5,7 +6,7 @@ export default function ChatListItem({ avatar, name, onclick}: chatItem) {
   return (
     <div className="flex items-center p-4 hover:bg-gray-100 rounded-xl"  onClick={onclick}>
       <img
-        src={avatar}
+        src={avatar || DEFAULT_AVATAR_URL}
         alt={`${name} avatar`}
         className="w-12 h-12 rounded-full object-cover"
       />

@@ -4,7 +4,7 @@ import { GenerateAccessToken, GenerateRefreshToken } from '../utils/GenerateToke
 
 export const addUser = async (req, res) => {
   try {
-    const { email, name, password, confirmPassword, avatar="" } = req.body;
+    const { email, name, password, confirmPassword, avatar = "" } = req.body;
 
     if (!email || !name || !password || !confirmPassword) {
       return res.status(400).json({ message: "Incomplete credentials..." });
@@ -29,7 +29,7 @@ export const addUser = async (req, res) => {
         email,
         name,
         password: hashedPassword,
-        avatar:avatar || ""
+        avatar: avatar || ""
       },
     });
 
@@ -85,13 +85,20 @@ export const loginUser = async (req, res) => {
 
 export const getAllChats = async (req, res) => {
   try {
+    const loggedInUser = req.user;
     const users = await db.user.findMany({
+      where: {
+        email: {
+          not: loggedInUser
+        }
+      },
       select: {
         id: true,
         name: true,
-        avatar:true
+        avatar: true
       }
-    });
+    }
+    );
     return res.status(200).send(users);
   } catch (error) {
     console.error(error);
@@ -109,9 +116,3 @@ export const getAvatar = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
-
-// export const getUserChats= async (req,res)=>{
-//   try{
-//     const user_id=req.body
-//   }
-// }

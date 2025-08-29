@@ -1,22 +1,27 @@
 import ChatListItem from '../../b-level/Chats/ChatListItem';
 import '../../../App.css';
-import { getAllUsers } from './function';
+import { getAllGroups, getAllUsers } from './function';
 import { useQuery } from '@tanstack/react-query';
-import { type Key } from 'react';
+import { useState, type Key } from 'react';
 import Loader from '../../c-level/Loader';
 import type { activeUser } from './types';
+import { ADD_GROUP_URL, DEFAULT_AVATAR_URL } from '../../../constants/constants';
 
-export default function ChatListContainer({setActivatedUser}:activeUser) {
-  const { data, isLoading, error } = useQuery({
+export default function ChatListContainer({setActivatedUser, setAddGroup}) {
+  const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery({
     queryKey: ['users'],
     queryFn: getAllUsers,
   });
-  if (isLoading) {
+  const { data: groupsData, isLoading: groupsLoading, error: groupsError } = useQuery({
+    queryKey: ['groups'],
+    queryFn: getAllGroups,
+  });
+  if (usersLoading || groupsLoading) {
     return <Loader/>;
   }
 
-  if (error) {
-    return <div className="p-4 text-red-500">Error fetching users</div>;
+  if (usersError || groupsError) {
+    return <div className="p-4 text-red-500">Error fetching data</div>;
   }
   return (
     <div className="w-full mx-auto border border-gray-300 rounded-2xl bg-white shadow-lg no-scrollbar">
@@ -27,14 +32,35 @@ export default function ChatListContainer({setActivatedUser}:activeUser) {
 
       {/* Chat List */}
       <div className="divide-y divide-gray-200">
-        {data?.map((chat: {
-          avatar: string; id: Key | null | undefined; name: string 
-}) => (
+        <ChatListItem
+            key="add-group"
+            name={"Add Group"}
+            avatar={ADD_GROUP_URL}
+            onclick={()=>{setAddGroup(true)}}
+          />
+        
+        {/* Groups Section */}
+        {groupsData?.groups?.map((group: {
+          id: Key | null | undefined; 
+          group: { id: string; name: string }
+        }) => (
           <ChatListItem
-            key={chat.id}
+            key={`group-${group.group.id}`}
+            avatar={DEFAULT_AVATAR_URL}
+            name={`📁 ${group.group.name}`}
+            onclick={()=>{setActivatedUser({userId:group.group.id, name:group.group.name, avatar:DEFAULT_AVATAR_URL, isGroup: true})}}
+          />
+        ))}
+
+        {/* Users Section */}
+        {usersData?.map((chat: {
+          avatar: string; id: Key | null | undefined; name: string 
+        }) => (
+          <ChatListItem
+            key={`user-${chat.id}`}
             avatar={chat.avatar}
             name={chat.name}
-            onclick={()=>{setActivatedUser({userId:chat.id,name:chat.name,avatar:chat.avatar})}}
+            onclick={()=>{setActivatedUser({userId:chat.id,name:chat.name,avatar:chat.avatar, isGroup: false})}}
           />
         ))}
       </div>

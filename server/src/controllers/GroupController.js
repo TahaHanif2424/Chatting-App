@@ -1,10 +1,9 @@
-import { use } from 'react';
 import db from '../database/prismaConfig.js';
 
 export const createGroup = async (req, res) => {
     try {
       const loggedIn =req.user;
-      const adminId=db.user.findUnique({
+      const adminId = await db.user.findUnique({
         where:{
           email:loggedIn
         },
@@ -16,7 +15,7 @@ export const createGroup = async (req, res) => {
         if (!adminId.id || !name) {
             return res.status(400).send({ message: "Admin or Name are require" });
         }
-        const user = await db.user.findUnique({ where: { id: adminId } });
+        const user = await db.user.findUnique({ where: { id: adminId.id } });
         if (!user) {
             return res.status(400).send({ message: "Admin not found..." });
         }
@@ -24,13 +23,13 @@ export const createGroup = async (req, res) => {
             db.group.create({
                 data: {
                     name,
+                    adminId: adminId.id,
                     members: {
                         create: { userId: adminId.id }
                     }
                 }
             })
         ]);
-
         return res.status(201).json({
             message: "Group created successfully",
             group
@@ -82,3 +81,63 @@ export const joinGroup = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
+export const getUserGroups = async (req, res) => {
+  try {
+    const loggedIn =req.user;
+    const userId = await db.user.findUnique({
+      where:{
+        email:loggedIn
+      },
+      select:{
+        id: true,
+      }
+    })
+      if (!userId.id) {
+          return res.status(400).send({ message: "User Id is require" });
+      }
+      const user = await db.user.findUnique({ where: { id: userId.id } });
+      if (!user) {
+          return res.status(400).send({ message: "User not found..." });
+      }
+      const groups = await db.groupMember.findMany({
+        where: { userId: userId.id },
+        include: { group: true }
+      });
+      return res.status(200).json({
+          message: "User groups fetched successfully",
+          groups
+      });
+  } catch (error) {
+      console.error("Error in getUserGroups:", error);
+      return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getGroupMessages = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    if (!groupId) {
+      return res.status(400).json({ message: "Group ID is required." });
+    }
+
+    const group = await db.group.findUnique({ where: { id: groupId } });
+    if (!group) {
+      return res.status(404).json({ message: "Group not found." });
+    }
+
+    const messages = await db.message.findMany({
+      where: { groupId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        from: { select: { id: true, name: true, avatar: true } }
+      }
+    });
+
+    return res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error in getGroupMessages:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+}

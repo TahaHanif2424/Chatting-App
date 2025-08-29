@@ -25,7 +25,6 @@ async function seedAvatars() {
     await prisma.avatar.createMany({
       data: avatars,
     });
-    console.log('✅ Avatars seeded successfully');
   } catch (err) {
     console.error('❌ Failed to seed avatars:', err);
   } finally {

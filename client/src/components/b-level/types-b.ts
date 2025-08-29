@@ -1,3 +1,3 @@
 export type chatItem={
-   avatar: string; name: string; onclick:()=>void;
+   avatar?: string; name: string; onclick:()=>void;
 }

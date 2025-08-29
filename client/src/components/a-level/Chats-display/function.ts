@@ -3,13 +3,18 @@ import type { sendMessage } from "./types";
 
 export const getAllUsers = async () => {
     const response = await axiosInstance.get('/user/chats');
-    console.log(response.data);
+    return response.data;
+}
+export const getAllGroups = async () => {
+    const response = await axiosInstance.get('/group');
     return response.data;
 }
 
+
 export const sendMessageFn = async ({ payload, toId, groupId }: sendMessage) => {
     try {
-        console.log({ payload, toId, groupId });
+        console.log(payload, toId, groupId);
+        console.log("Sending message to:", toId ? toId : groupId);
         if (!toId && !groupId) {
             throw new Error("Both toID and groupID cannot be null");
         };
@@ -21,7 +26,6 @@ export const sendMessageFn = async ({ payload, toId, groupId }: sendMessage) => 
             toId: toId ? toId : null,
             groupId: groupId ? groupId : null,
         });
-        console.log(response.data);
     } catch (error) {
         console.log(error);
     }
@@ -33,9 +37,20 @@ export const getMessageforUser = async (toId: string) => {
         if (!toId)
             throw new Error("toId is not present");
         const response = await axiosInstance.get(`/message/${toId}`);
-        console.log(response.data)
         return response.data;
     } catch (error) {
         console.log(error);
+        throw error;
+    }
+}
+export const getMessageforGroup = async (groupId: string) => {
+    try {
+        if (!groupId)
+            throw new Error("toId is not present");
+        const response = await axiosInstance.get(`/group/messages/${groupId}`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw error;
     }
 }

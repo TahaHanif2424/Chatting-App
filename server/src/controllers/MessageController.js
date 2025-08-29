@@ -5,7 +5,7 @@ export const sendMessage = async (req, res) => {
   try {
     const loggedIn = req.user;
     const { payload, toId = null, groupId = null } = req.body;
-
+    console.log(req.body);
     if (!payload || !loggedIn) {
       return res.status(400).json({ message: "payload and fromId are required." });
     }
@@ -14,6 +14,7 @@ export const sendMessage = async (req, res) => {
     }
 
     const sender = await db.user.findFirst({ where: { email: loggedIn }, select: { id: true, name: true } });
+    console.log("Sender:", sender);
     if (!sender) {
       return res.status(404).json({ message: "Sender not found." });
     }
@@ -42,6 +43,7 @@ export const sendMessage = async (req, res) => {
       }
     });
 
+    console.log("Message created:", message);
     // 🔥 Emit to socket
     if (toId) {
       // 1-to-1 chat
@@ -75,8 +77,6 @@ export const getMessageOfUser = async (req, res) => {
     if (!sender) {
       return res.status(404).json({ message: "Sender not found." });
     }
-console.log("Sender ID:", sender.id, sender.name);
-console.log("To ID:", toId);
 
 const all = await db.message.findMany({
   orderBy: { createdAt: 'asc' }
@@ -94,7 +94,6 @@ const all = await db.message.findMany({
         to: { select: { id: true, name: true, avatar: true } }
       }
     });
-    console.log("Fetched Messages:", messages);
     return res.status(200).json(messages);
 
   } catch (error) {
