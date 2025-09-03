@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useFormik } from 'formik';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMessageforGroup, getMessageforUser, sendMessageFn } from './function';
 import { useSocketMessage } from '../../../hooks/useSocket';
 import type { Message, User } from './types';
+import { leaveGroup } from '../../b-level/function';
 
 
 
@@ -44,15 +45,29 @@ export function useChat(activatedUserId?: string, isGroup?: boolean) {
   const handleNewMessage = useCallback(
     (message: Message) => {
       if (!activatedUserId) return;
-      const queryKey = ['messages', activatedUserId];
-      queryClient.setQueryData<Message[] | undefined>(queryKey, (oldData) => {
-        if (!oldData) return [message];
-        const exists = oldData.some((m) => m.id === message.id);
-        if (exists) return oldData;
-        return [...oldData, message];
-      });
+      
+      // Handle group messages
+      if (message.groupId && isGroup) {
+        const queryKey = ['groupMessages', activatedUserId];
+        queryClient.setQueryData<Message[] | undefined>(queryKey, (oldData) => {
+          if (!oldData) return [message];
+          const exists = oldData.some((m) => m.id === message.id);
+          if (exists) return oldData;
+          return [...oldData, message];
+        });
+      }
+      // Handle private messages
+      else if (message.toId && !isGroup) {
+        const queryKey = ['messages', activatedUserId];
+        queryClient.setQueryData<Message[] | undefined>(queryKey, (oldData) => {
+          if (!oldData) return [message];
+          const exists = oldData.some((m) => m.id === message.id);
+          if (exists) return oldData;
+          return [...oldData, message];
+        });
+      }
     },
-    [activatedUserId, queryClient]
+    [activatedUserId, queryClient, isGroup]
   );
 
   // Subscribe to socket stream
@@ -68,7 +83,10 @@ export function useChat(activatedUserId?: string, isGroup?: boolean) {
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
       if (!values.payload.trim()) return;
-      await sendMessageFn(values);
+      const result=await sendMessageFn(values);
+      if(!result){
+        alert("You cannot send message to this group");
+      }
       // Ensure we refetch after sending
       if (activatedUserId && !isGroup) {
         queryClient.invalidateQueries({ queryKey: ['messages', activatedUserId] });
@@ -78,6 +96,14 @@ export function useChat(activatedUserId?: string, isGroup?: boolean) {
       resetForm();
     },
   });
+
+  const leaveGroupMutation = useMutation({
+        mutationFn: leaveGroup,
+        onSuccess: () => {
+           queryClient.invalidateQueries({ queryKey: ['groups'] });
+           alert('Group Leaved successfully')
+        }
+    });
 
   return {
     // data
@@ -93,5 +119,7 @@ export function useChat(activatedUserId?: string, isGroup?: boolean) {
     values: formik.values,
     handleChange: formik.handleChange,
     handleSubmit: formik.handleSubmit,
+
+    leaveGroupMutation
   };
 }

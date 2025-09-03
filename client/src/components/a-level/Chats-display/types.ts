@@ -8,6 +8,7 @@ export type Message = {
   id: string;
   fromId: string;
   toId?: string;
+  groupId?: string;
   payload: string;
   createdAt?: string | number | Date;
   from: {

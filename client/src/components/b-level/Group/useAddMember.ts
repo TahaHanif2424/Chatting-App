@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormik } from "formik";
-import { createGroup } from "../function";
+import { addMembersToGroup, createGroup } from "../function";
 
 const useAddMember=(onSuccess?: () => void)=>{
     const queryClient = useQueryClient();
@@ -16,7 +16,14 @@ const useAddMember=(onSuccess?: () => void)=>{
         }
     });
 
-    const{  values, errors, handleChange, handleSubmit, handleBlur }=useFormik({
+    const addMemberMutation = useMutation({
+        mutationFn: addMembersToGroup,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
+        }
+    });
+
+    const{  values, handleChange, handleSubmit }=useFormik({
         initialValues:{
             name:"",
         },
@@ -29,6 +36,7 @@ return {
     handleChange,
     handleSubmit,
     createGroupMutation,
+    addMemberMutation
 }
 }
 export default useAddMember;

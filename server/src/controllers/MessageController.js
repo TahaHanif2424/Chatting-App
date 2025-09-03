@@ -5,7 +5,6 @@ export const sendMessage = async (req, res) => {
   try {
     const loggedIn = req.user;
     const { payload, toId = null, groupId = null } = req.body;
-    console.log(req.body);
     if (!payload || !loggedIn) {
       return res.status(400).json({ message: "payload and fromId are required." });
     }
@@ -14,7 +13,6 @@ export const sendMessage = async (req, res) => {
     }
 
     const sender = await db.user.findFirst({ where: { email: loggedIn }, select: { id: true, name: true } });
-    console.log("Sender:", sender);
     if (!sender) {
       return res.status(404).json({ message: "Sender not found." });
     }
@@ -26,7 +24,8 @@ export const sendMessage = async (req, res) => {
 
     if (groupId) {
       const group = await db.group.findUnique({ where: { id: groupId } });
-      if (!group) return res.status(404).json({ message: "Group not found." });
+      const isMember=await db.groupMember.findFirst({where:{userId:sender.id, groupId:groupId}});
+      if (!group || ! isMember) return res.status(404).json({ message: "Group not found." });
     }
 
     const message = await db.message.create({
@@ -43,8 +42,6 @@ export const sendMessage = async (req, res) => {
       }
     });
 
-    console.log("Message created:", message);
-    // 🔥 Emit to socket
     if (toId) {
       // 1-to-1 chat
       io.to(toId.toString()).emit('receive_message', message);

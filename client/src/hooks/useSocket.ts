@@ -5,7 +5,8 @@ interface Message {
   id: string;
   payload: string;
   fromId: string;
-  toId: string;
+  toId?: string;
+  groupId?: string;
   createdAt: string;
   from: {
     id: string;

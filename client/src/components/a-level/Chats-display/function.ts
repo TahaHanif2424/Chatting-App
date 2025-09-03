@@ -21,11 +21,12 @@ export const sendMessageFn = async ({ payload, toId, groupId }: sendMessage) => 
         if (!payload) {
             throw new Error("Cannot send empty message");
         }
-        const response = await axiosInstance.post('/message', {
+        const response=await axiosInstance.post('/message', {
             payload,
             toId: toId ? toId : null,
             groupId: groupId ? groupId : null,
         });
+        return response.data;
     } catch (error) {
         console.log(error);
     }

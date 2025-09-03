@@ -1,5 +1,5 @@
 import express from 'express';
-import { createGroup, joinGroup , getUserGroups , getGroupMessages} from '../controllers/GroupController.js';
+import { createGroup, joinGroup , getUserGroups , getGroupMessages, searchUser, getMembersByGroupId, leaveGroup} from '../controllers/GroupController.js';
 const router=express.Router();
 
 
@@ -8,6 +8,8 @@ router.post("/",createGroup);
 router.post("/join",joinGroup);
 router.get("/",getUserGroups);
 router.get("/messages/:groupId",getGroupMessages);
-
+router.get("/addUser",searchUser);
+router.get("/members",getMembersByGroupId);
+router.delete("/leave",leaveGroup);
 
 export default router;

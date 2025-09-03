@@ -1,8 +1,22 @@
-@import "tailwindcss";
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "./styles/theme.css";
+
+/* Animation for gradient background */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
 }
